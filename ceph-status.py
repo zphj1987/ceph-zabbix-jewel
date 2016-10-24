@@ -13,7 +13,7 @@ def main():
         except:
             print "unknown"
 
-##获取集群的状态
+##get ceph cluster status
 def get_cluster_health() :
     cluster_health = commands.getoutput('ceph health -f json-pretty 2>/dev/null')
     json_str = json.loads(cluster_health)
