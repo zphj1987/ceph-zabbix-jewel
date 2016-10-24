@@ -1,6 +1,6 @@
 ceph-zabbix-jewel
 
-是基于https://github.com/thelan/ceph-zabbix的修改版本，在整体思路一致的情况下,进行一些优化和新的适配，方便扩展
+是基于 https://github.com/thelan/ceph-zabbix 的修改版本，在整体思路一致的情况下,进行一些优化和新的适配，方便扩展
 
 ##安装
 
