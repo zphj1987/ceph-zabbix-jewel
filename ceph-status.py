@@ -10,7 +10,7 @@ def main():
         try:
             print get_cluster_health()
         except:
-            print "255"
+            print 255
     if sys.argv[1] == 'used_percent':
         try:
             print get_cluster_used_percent()
