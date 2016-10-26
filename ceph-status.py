@@ -102,6 +102,5 @@ def get_cluster_latency(arg):
             return sum(osd_apply_list)/len(osd_apply_list)
         except:
             return 0
-
 if __name__ == '__main__':
     main()
