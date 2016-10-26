@@ -17,3 +17,8 @@ ceph-zabbix-jewel
 完成集群状态获取
 完成集群使用百分比的获取
 
+
+
+
+##图例：
+![](http://static.zybuluo.com/zphj1987/uukuprw99x5uhmwr32yfy6qk/grafana.png)
