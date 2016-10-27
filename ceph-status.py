@@ -51,7 +51,11 @@ def main():
             print get_cluster_total_ops()
         except:
             print 0
-
+    if sys.argv[1] == 'total_pools':
+        try:
+            print get_cluster_total_pools()
+        except:
+            print 0
 
 ##get ceph cluster status
 def get_cluster_health() :
@@ -155,5 +159,16 @@ def get_cluster_total_ops():
         return sum(ops_list)
     except:
         return 0
+
+# get cluster total pools (has bug for get pools)
+def get_cluster_total_pools():
+    try:
+        cluster_total_pools = commands.getoutput('timeout 10 ceph osd lspools  -f json-pretty 2>/dev/null')
+        json_str = json.loads(cluster_total_pools)
+        return len(json_str)
+    except:
+        return 0
+
+
 if __name__ == '__main__':
     main()
