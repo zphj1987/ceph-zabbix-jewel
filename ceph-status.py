@@ -58,8 +58,18 @@ def main():
             print 0
     if sys.argv[1] == 'pools':
         try:
-            print "OK"
             print get_cluster_pools()
+        except:
+            print 0
+#test unit
+    if sys.argv[1] == 'pool_objects':
+        try:
+            print get_pool_objects(sys.argv[2])
+        except:
+            print 0
+    if  sys.argv[1] == 'pool_bytes_used':
+        try:
+            print get_pool_bytes_used(sys.argv[2])
         except:
             print 0
 
@@ -175,20 +185,45 @@ def get_cluster_total_pools():
     except:
         return 0
 
+#get all pool name
 def get_cluster_pools():
     try:
         pool_list=[]
         data_dic = {}
-        cluster_pools = commands.getoutput('timeout 10 ceph osd pool ls -f json 2>/dev/null')
-        json_str = json.loads(cluster_pools)
-        for item in json_str:
+        cluster_pools = commands.getoutput('timeout 10 ceph df -f json-pretty 2>/dev/null')
+        json_str=json.loads(cluster_pools)
+        for item in json_str["pools"]:
             pool_dic = {}
-            pool_dic['{#POOLNAME}'] = str(item)
+            pool_dic['{#POOLNAME}'] = str(item["name"])
             pool_list.append(pool_dic)
         data_dic['data'] = pool_list
         return json.dumps(data_dic,separators=(',', ':'))
     except:
         return 0
+#get every pool object
+def get_pool_objects(poolname):
+    try:
+        pool_objects = commands.getoutput('timeout 10 ceph df -f json-pretty 2>/dev/null')
+        json_str = json.loads(pool_objects)
+        for item in json_str["pools"]:
+            if item["name"] == poolname:
+                return item["stats"]["objects"]
+                break
+    except:
+        return 0
+#get every pool used
+def get_pool_bytes_used(poolname):
+    try:
+        pool_bytes_used = commands.getoutput("timeout 10 ceph df -f json-pretty 2>/dev/null")
+        json_str = json.loads(pool_bytes_used)
+        for item in json_str["pools"]:
+            if item["name"] == poolname:
+                return item["stats"]["bytes_used"]
+                break
+    except:
+        return 0
+
+
 
 if __name__ == '__main__':
     main()
