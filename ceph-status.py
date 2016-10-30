@@ -64,15 +64,14 @@ def main():
 #test unit
     if sys.argv[1] == 'pool_objects':
         try:
-            print get_pool_objects(sys.argv[2])
+            print get_pool_stats(sys.argv[2],"objects")
         except:
             print 0
     if  sys.argv[1] == 'pool_bytes_used':
         try:
-            print get_pool_bytes_used(sys.argv[2])
+            print get_pool_stats(sys.argv[2],"used")
         except:
             print 0
-
 ##get ceph cluster status
 def get_cluster_health() :
     cluster_health = commands.getoutput('timeout 10 ceph health -f json-pretty 2>/dev/null')
@@ -200,28 +199,29 @@ def get_cluster_pools():
         return json.dumps(data_dic,separators=(',', ':'))
     except:
         return 0
-#get every pool object
-def get_pool_objects(poolname):
-    try:
-        pool_objects = commands.getoutput('timeout 10 ceph df -f json-pretty 2>/dev/null')
-        json_str = json.loads(pool_objects)
-        for item in json_str["pools"]:
-            if item["name"] == poolname:
-                return item["stats"]["objects"]
-                break
-    except:
-        return 0
-#get every pool used
-def get_pool_bytes_used(poolname):
-    try:
-        pool_bytes_used = commands.getoutput("timeout 10 ceph df -f json-pretty 2>/dev/null")
-        json_str = json.loads(pool_bytes_used)
-        for item in json_str["pools"]:
-            if item["name"] == poolname:
-                return item["stats"]["bytes_used"]
-                break
-    except:
-        return 0
+#get every pool object,used
+def get_pool_stats(poolname,stats):
+    if stats == "objects":
+        try:
+            pool_objects = commands.getoutput('timeout 10 ceph df -f json-pretty 2>/dev/null')
+            json_str = json.loads(pool_objects)
+            for item in json_str["pools"]:
+                if item["name"] == poolname:
+                    return item["stats"]["objects"]
+                    break
+        except:
+            return 0
+    elif stats == "used" :
+        try:
+            pool_bytes_used = commands.getoutput("timeout 10 ceph df -f json-pretty 2>/dev/null")
+            json_str = json.loads(pool_bytes_used)
+            for item in json_str["pools"]:
+                if item["name"] == poolname:
+                    return item["stats"]["bytes_used"]
+                    break
+        except:
+            return 0
+
 
 
 
