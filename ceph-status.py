@@ -4,7 +4,6 @@ import os
 import sys
 import commands
 import json
-
 def main():
     if sys.argv[1] == 'health':
         try:
@@ -67,9 +66,54 @@ def main():
             print get_pool_stats(sys.argv[2],"objects")
         except:
             print 0
-    if  sys.argv[1] == 'pool_bytes_used':
+    if sys.argv[1] == 'pool_bytes_used':
         try:
             print get_pool_stats(sys.argv[2],"used")
+        except:
+            print 0
+    if sys.argv[1] == 'pool_throughput_write':
+        try:
+            print get_pool_stats(sys.argv[2],"throughput_write")
+        except:
+            print 0
+    if sys.argv[1] == 'pool_throughput_read':
+        try:
+            print get_pool_stats(sys.argv[2], "throughput_read")
+        except:
+            print 0
+    if sys.argv[1] == 'pool_op_write':
+        try:
+            print get_pool_stats(sys.argv[2], "op_write")
+        except:
+            print 0
+    if sys.argv[1] == 'pool_op_read':
+        try:
+            print get_pool_stats(sys.argv[2], "op_read")
+        except:
+            print 0
+    if sys.argv[1] == 'pool_id':
+        try:
+            print get_pool_config(sys.argv[2],"id")
+        except:
+            print 0
+    if sys.argv[1] == 'pool_size':
+        try:
+            print get_pool_config(sys.argv[2],"size")
+        except:
+            print 0
+    if sys.argv[1] == 'pool_min_size':
+        try:
+            print get_pool_config(sys.argv[2], "min_size")
+        except:
+            print 0
+    if sys.argv[1] == 'pool_pg_num':
+        try:
+            print get_pool_config(sys.argv[2], "pg_num")
+        except:
+            print 0
+    if sys.argv[1] == 'pool_pgp_num':
+        try:
+            print get_pool_config(sys.argv[2], "pgp_num")
         except:
             print 0
 ##get ceph cluster status
@@ -174,7 +218,6 @@ def get_cluster_total_ops():
         return sum(ops_list)
     except:
         return 0
-
 # get cluster total pools (has bug for get pools)
 def get_cluster_total_pools():
     try:
@@ -183,7 +226,6 @@ def get_cluster_total_pools():
         return len(json_str)
     except:
         return 0
-
 #get all pool name
 def get_cluster_pools():
     try:
@@ -199,7 +241,7 @@ def get_cluster_pools():
         return json.dumps(data_dic,separators=(',', ':'))
     except:
         return 0
-#get every pool object,used
+#get every pool object,used, throughput,ops
 def get_pool_stats(poolname,stats):
     if stats == "objects":
         try:
@@ -221,9 +263,102 @@ def get_pool_stats(poolname,stats):
                     break
         except:
             return 0
+    elif stats == "throughput_write":
+        try:
+            pool_throughput_write = commands.getoutput("timeout 10 ceph osd pool stats -f json-pretty 2>/dev/null")
+            json_str = json.loads(pool_throughput_write)
+            for item in json_str:
+                if item["pool_name"] == poolname:
+                    if item["client_io_rate"].has_key('write_bytes_sec') == True:
+                        return  item["client_io_rate"]["write_bytes_sec"]
+                    else:
+                        return 0
+        except:
+            return 0
 
+    elif stats == "throughput_read":
+        try:
+            pool_throughput_read = commands.getoutput("timeout 10 ceph osd pool stats -f json-pretty 2>/dev/null")
+            json_str = json.loads(pool_throughput_read)
+            for item in json_str:
+                if item["pool_name"] == poolname:
+                    if item["client_io_rate"].has_key('read_bytes_sec') == True:
+                        return item["client_io_rate"]["read_bytes_sec"]
+                    else:
+                        return 0
+        except:
+            return 0
 
+    elif stats == "op_write":
+        try:
+            pool_op_write = commands.getoutput("timeout 10 ceph osd pool stats -f json-pretty 2>/dev/null")
+            json_str = json.loads(pool_op_write)
+            for item in json_str:
+                if item["pool_name"] == poolname:
+                    if item["client_io_rate"].has_key('write_op_per_sec') == True:
+                        return item["client_io_rate"]["write_op_per_sec"]
+                    else:
+                        return 0
+        except:
+            return 0
 
+    elif stats == "op_read":
+        try:
+            pool_op_read = commands.getoutput("timeout 10 ceph osd pool stats -f json-pretty 2>/dev/null")
+            json_str = json.loads(pool_op_read)
+            for item in json_str:
+                if item["pool_name"] == poolname:
+                    if item["client_io_rate"].has_key('read_op_per_sec') == True:
+                        return item["client_io_rate"]["read_op_per_sec"]
+                    else:
+                        return 0
+        except:
+            return 0
+    elif stats == "size":
+        try:
+            print stats
+            pool_size = commands.getoutput("timeout 10 ceph   osd pool get rbd size -f json-pretty 2>/dev/null")
+            json_str = json.loads(pool_size)
+            print json_str
+        except:
+            return 0
+#get cluster pool config
+def get_pool_config(poolname,config):
+    if config == "size":
+        try:
+            pool_size = commands.getoutput("timeout 10 ceph   osd pool get %s size -f json-pretty 2>/dev/null" %(poolname))
+            json_str = json.loads(pool_size)
+            return json_str["size"]
+        except:
+            return 0
+    elif config == "id":
+        try:
+            pool_id = commands.getoutput("timeout 10 ceph   osd pool get %s size -f json-pretty 2>/dev/null" % (poolname))
+            json_str = json.loads(pool_id)
+            return json_str["pool_id"]
+        except:
+            return 0
+    elif config == "min_size":
+        try:
+            pool_min_size = commands.getoutput("timeout 10 ceph   osd pool get %s min_size -f json-pretty 2>/dev/null" % (poolname))
+            json_str = json.loads(pool_min_size)
+            return json_str["min_size"]
+        except:
+            return 0
+    elif config == "pg_num":
+        try:
+            pool_pg_num = commands.getoutput("timeout 10 ceph   osd pool get %s pg_num -f json-pretty 2>/dev/null" % (poolname))
+            json_str = json.loads(pool_pg_num)
+            return json_str["pg_num"]
+        except:
+            return 0
+    elif config == "pgp_num":
+        try:
+            pool_pgp_num = commands.getoutput("timeout 10 ceph   osd pool get %s pgp_num -f json-pretty 2>/dev/null" % (poolname))
+            json_str = json.loads(pool_pgp_num)
+            return json_str["pgp_num"]
+        except:
+            return 0
 
 if __name__ == '__main__':
     main()
