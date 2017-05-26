@@ -64,9 +64,25 @@ def main():
         try:
             print get_host_osds()
         except:
-            print 0			
-			
-			
+            print 0
+    if sys.argv[1] == 'osds_mem_use_virt':
+        try:
+            print get_osd_mem_virt(sys.argv[2],"virt")
+        except:
+            print 0
+    if sys.argv[1] == 'osds_mem_use_res':
+        try:
+            print get_osd_mem_virt(sys.argv[2],"res")
+        except:
+            print 0
+
+    if sys.argv[1] == 'osds_cpu_use':
+        try:
+            print get_osd_cpu(sys.argv[2])
+        except:
+            print 0
+    
+
 #test unit
     if sys.argv[1] == 'pool_objects':
         try:
@@ -249,8 +265,6 @@ def get_cluster_pools():
     except:
         return 0
 
-
-#get all osd  in  a host		
 def get_host_osds():
     try:
         osd_list=[]
@@ -266,10 +280,35 @@ def get_host_osds():
         return json.dumps(data_dic,separators=(',', ':'))
     except:
         return 0
-		
 
 
-		
+def get_osd_mem_virt(osd,memtype):
+    try:
+        pidfile="/var/run/ceph/osd.%s.pid" %osd
+        osdpid = commands.getoutput('cat %s  2>/dev/null' %pidfile)
+        if not osdpid :
+            return 0
+        elif memtype == "virt":
+            osd_runmemvsz = commands.getoutput('ps -p %s  -o vsz |grep -v VSZ 2>/dev/null' %osdpid)
+            return osd_runmemvsz
+        elif memtype == "res":
+            osd_runmemrsz = commands.getoutput('ps -p %s  -o rsz |grep -v RSZ 2>/dev/null' %osdpid)
+            return osd_runmemrsz
+        
+    except:
+        return 0
+def get_osd_cpu(osd):
+    try:
+        pidfile="/var/run/ceph/osd.%s.pid" %osd
+        osdpid = commands.getoutput('cat %s  2>/dev/null' %pidfile)
+        if not osdpid :
+            return 0
+        osd_cpu = commands.getoutput('''ps -p %s  -o pcpu |grep -v CPU|awk 'gsub(/^ *| *$/,"")' 2>/dev/null''' %osdpid)
+        return osd_cpu
+    except:
+        return 0
+
+
 
 #get every pool object,used, throughput,ops
 def get_pool_stats(poolname,stats):
