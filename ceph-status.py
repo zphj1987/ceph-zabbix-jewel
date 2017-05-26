@@ -60,6 +60,13 @@ def main():
             print get_cluster_pools()
         except:
             print 0
+    if sys.argv[1] == 'osds':
+        try:
+            print get_host_osds()
+        except:
+            print 0			
+			
+			
 #test unit
     if sys.argv[1] == 'pool_objects':
         try:
@@ -241,6 +248,29 @@ def get_cluster_pools():
         return json.dumps(data_dic,separators=(',', ':'))
     except:
         return 0
+
+
+#get all osd  in  a host		
+def get_host_osds():
+    try:
+        osd_list=[]
+        data_dic={}
+        osds=[]
+        host_osds = commands.getoutput("mount|grep osd|awk '{print $3}'|cut -f2 -d - 2>/dev/null")
+        host_osds = host_osds.splitlines()
+        for osd in host_osds:
+            osd_dic = {}
+            osd_dic['{#OSD}'] = str(osd)
+            osd_list.append(osd_dic)
+        data_dic['data'] = osd_list
+        return json.dumps(data_dic,separators=(',', ':'))
+    except:
+        return 0
+		
+
+
+		
+
 #get every pool object,used, throughput,ops
 def get_pool_stats(poolname,stats):
     if stats == "objects":
