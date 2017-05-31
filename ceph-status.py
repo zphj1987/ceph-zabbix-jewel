@@ -71,10 +71,10 @@ def main():
         except:
             print 0
     if sys.argv[1] == 'osds_mem_use_res':
-        try:
+#        try:
             print get_osd_mem_virt(sys.argv[2],"res")
-        except:
-            print 0
+#        except:
+#            print 0
 
     if sys.argv[1] == 'osds_cpu_use':
         try:
@@ -82,6 +82,21 @@ def main():
         except:
             print 0
     
+#get fio write speed (KB/s)
+    if sys.argv[1] == 'fio_write_speed':
+        try:
+            print get_fio_write_speed()
+        except:
+            print 0
+
+
+#get fio write speed (KB/s)
+    if sys.argv[1] == 'fio_read_speed':
+        try:
+            print get_fio_read_speed()
+        except:
+            print 0
+
 
 #test unit
     if sys.argv[1] == 'pool_objects':
@@ -283,7 +298,7 @@ def get_host_osds():
 
 
 def get_osd_mem_virt(osd,memtype):
-    try:
+#    try:
         pidfile="/var/run/ceph/osd.%s.pid" %osd
         osdpid = commands.getoutput('cat %s  2>/dev/null' %pidfile)
         if not osdpid :
@@ -295,8 +310,8 @@ def get_osd_mem_virt(osd,memtype):
             osd_runmemrsz = commands.getoutput('ps -p %s  -o rsz |grep -v RSZ 2>/dev/null' %osdpid)
             return osd_runmemrsz
         
-    except:
-        return 0
+#    except:
+#        return 0
 def get_osd_cpu(osd):
     try:
         pidfile="/var/run/ceph/osd.%s.pid" %osd
@@ -307,6 +322,28 @@ def get_osd_cpu(osd):
         return osd_cpu
     except:
         return 0
+
+def get_fio_write_speed():
+    try:
+        fio_write_speed = commands.getoutput('''iotop --batch --iter 1 -P -k |grep fio|grep -v fio_write_speed|grep -v grep |awk '{print $6}'  2>/dev/null''')
+        if not fio_write_speed:
+            return 0
+        else:
+            return fio_write_speed
+    except:
+        return 0
+
+def get_fio_read_speed():
+    try:
+        fio_read_speed = commands.getoutput('''iotop --batch --iter 1 -P -k |grep fio|grep -v fio_read_speed|grep -v grep |awk '{print $4}'  2>/dev/null''')
+        if not fio_read_speed:
+            return 0
+        else:
+            return fio_read_speed
+    except:
+        return 0
+
+
 
 
 
